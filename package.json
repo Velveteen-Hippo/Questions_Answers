@@ -1,0 +1,24 @@
+{
+  "name": "questions_answers",
+  "version": "1.0.0",
+  "description": "questions and answers component",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Velveteen-Hippo/Questions_Answers.git"
+  },
+  "author": "Mikka Tully",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Velveteen-Hippo/Questions_Answers/issues"
+  },
+  "homepage": "https://github.com/Velveteen-Hippo/Questions_Answers#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "pg": "^8.6.0",
+    "underscore": "^1.13.1"
+  }
+}
