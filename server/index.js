@@ -54,23 +54,24 @@ app.post('/qa/questions', (req, res) => {
       });
 });
 
-// app.post('/qa/questions/:question_id/answers', (req, res) => {
-//   const questionID = req.params.question_id;
-//   const answerBody = req.body.body;
-//   const answererName = req.body.name;
-//   const answererEmail = req.body.email;
-//   const photos = req.body.photos;
+app.post('/qa/answers', (req, res) => {
+  const questionID = req.query.question_id;
+  const answerBody = req.body.body;
+  const answererName = req.body.name;
+  const answererEmail = req.body.email;
+  const photos = req.body.photos;
 
-//   questions.postAnswerForQuestion(
-//       questionID, answerBody, answererName, answererEmail, photos,
-//       function(err, results) {
-//         if (err) {
-//           res.status(400).send('Error creating answer :(');
-//         } else {
-//           res.status(200).send('Answer created! :)');
-//         }
-//       });
-// });
+  questions.postAnswerForQuestion(
+      questionID, answerBody, answererName, answererEmail, photos,
+      function(err, results) {
+        if (err) {
+          console.log('err', err);
+          res.status(400).send('Error creating answer :(');
+        } else {
+          res.status(200).send('Answer created! :)');
+        }
+      });
+});
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
