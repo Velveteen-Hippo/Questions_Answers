@@ -89,34 +89,36 @@ const postQuestion = function(
       });
 };
 
-// const postAnswerForQuestion = function(
-//   questionID, answerBody, answererName, answererEmail, photos, callback) {
-// const insertQuestion =
-//   `INSERT INTO
-//     questions(
-//       "product_id",
-//       "body",
-//       "asker_name",
-//       "asker_email",
-//       "reported",
-//       "helpful"
-//     )
-//   VALUES (
-//     $1,
-//     $2,
-//     $3,
-//     $4,
-//     'false',
-//     0
-//   );`;
+const postAnswerForQuestion = function(
+    questionID, answerBody, answererName, answererEmail, photos, callback) {
+  const insertAnswer =
+    `INSERT INTO
+      answers(
+        "question_id",
+        "body",
+        "answerer_name",
+        "answerer_email",
+        "photos",
+        "reported",
+        "helpful"
+      )
+    VALUES (
+      $1,
+      $2,
+      $3,
+      $4,
+      $5,
+      'false',
+      0
+    );`;
 
-// psqlConnection.query(
-//     insertQuestion,
-//     [productID, questionBody, askerName, askerEmail],
-//     function(err, results) {
-//       callback(err, results);
-//     });
-// };
+  psqlConnection.query(
+      insertAnswer,
+      [questionID, answerBody, answererName, answererEmail, photos],
+      function(err, results) {
+        callback(err, results);
+      });
+};
 
 module.exports = {
   getQuestionsWithAnswersAndPhotos,
@@ -124,3 +126,5 @@ module.exports = {
   postQuestion,
   postAnswerForQuestion,
 };
+
+
