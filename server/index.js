@@ -1,4 +1,6 @@
+// const express = require('express');
 const express = require('express');
+// const db = require('../database-mysql');
 const questions = require('../models/questions.js');
 const bodyParser = require('body-parser');
 
@@ -10,12 +12,25 @@ const PORT = 3000;
 app.use(bodyParser.json());
 
 app.get('/qa/questions/:id', (req, res) => {
-  console.log('req inside qa/questions/:id route', req.params);
   const productID = req.params.id;
 
-  questions.getAllQuestionsForProduct(productID, function(err, results) {
+  questions.getQuestionsWithAnswersAndPhotos(productID, function(err, results) {
     if (err) {
-      res.status(400).send('Error getting all transactions');
+      res.status(400).send(
+          'Error getting all questions, answers, photos for product',
+      );
+    } else {
+      res.status(200).send(results);
+    }
+  });
+});
+
+app.get('/qa/questions/:question_id/answers', (req, res) => {
+  const questionID = req.params.question_id;
+
+  questions.getAllAnswersForQuestion(questionID, function(err, results) {
+    if (err) {
+      res.status(400).send('Error getting all answers for question');
     } else {
       res.status(200).send(results);
     }
@@ -26,36 +41,6 @@ app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });
 
-// const express = require('express');
-// const db = require('../database-mysql');
-
-// const app = express();
-// const PORT = 8080;
-
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
-
-// app.use(express.static(__dirname + '/../client/dist'));
-
-// app.get('/api/transactions', (req, res) => {
-//   db.getAllTransactions(function(err, results) {
-//     if (err) {
-//       res.send('Error getting all transactions');
-//     } else {
-//       res.send(results);
-//     }
-//   });
-// });
-
-// app.get('/api/categories', (req, res) => {
-//   db.getAllCategories(function(err, results) {
-//     if (err) {
-//       res.send('Error getting all categories');
-//     } else {
-//       res.send(results);
-//     }
-//   });
-// });
 
 // app.post('/api/categories', (req, res) => {
 //   var categoryName = req.body.name;
@@ -87,6 +72,3 @@ app.listen(PORT, () => {
 //   });
 // });
 
-// app.listen(PORT, () => {
-//   console.log(`listening on port ${PORT}`);
-// });
