@@ -94,7 +94,7 @@ CREATE TABLE answers (
 -- date_written DATE NOT NULL DEFAULT CURRENT_DATE
 
 
--- Create index - create it in a table for all columns used with 'WHERE' of a query
+-- Create index - create it in a table for all columns used with 'WHERE, ON or AND' of a query
 -- Adding indexes for getQuestionsWithAnswers:
 -- CREATE INDEX questionsForProduct_idx ON questions(product_id, reported);
 -- CREATE INDEX answersForQs_idx ON answers(question_id, reported);
