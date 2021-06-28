@@ -24,16 +24,17 @@ const getQuestionsWithAnswersAndPhotos = function(productID, callback) {
         'body', answers.body,
         'date', answers.date_written,
         'answerer_name', answers.answerer_name,
-        'helpfulness', answers.helpful, 'photos', answers.photos)) as answers
+        'helpfulness', answers.helpful,
+        'photos', answers.photos)) as answers
     FROM questions
     JOIN answers
       ON questions.id = answers.question_id
-    WHERE questions.product_id=${productID}
+    WHERE questions.product_id=$1
       AND questions.reported = false
       AND answers.reported = false
     GROUP BY questions.id;`;
 
-  psqlConnection.query(joinQAndA, function(err, results) {
+  psqlConnection.query(joinQAndA, [productID], function(err, results) {
     callback(err, results.rows);
   });
 };
@@ -45,77 +46,81 @@ const getAllAnswersForQuestion = function(questionID, callback) {
     FROM
       answers
     WHERE
-      question_id=${questionID}
+      question_id=$1
       AND
       reported = false
     GROUP BY
       answers.id;`;
 
-  psqlConnection.query(selectAllAnswersForQuestion, function(err, results) {
-    callback(err, results.rows);
-  });
+  psqlConnection.query(
+      selectAllAnswersForQuestion,
+      [questionID],
+      function(err, results) {
+        callback(err, results.rows);
+      });
 };
+
+const postQuestion = function(
+    questionBody, askerName, askerEmail, productID, callback) {
+  const insertQuestion =
+    `INSERT INTO
+      questions(
+        "product_id",
+        "body",
+        "asker_name",
+        "asker_email",
+        "reported",
+        "helpful"
+      )
+    VALUES (
+      $1,
+      $2,
+      $3,
+      $4,
+      'false',
+      0
+    );`;
+
+  psqlConnection.query(
+      insertQuestion,
+      [productID, questionBody, askerName, askerEmail],
+      function(err, results) {
+        callback(err, results);
+      });
+};
+
+// const postAnswerForQuestion = function(
+//   questionID, answerBody, answererName, answererEmail, photos, callback) {
+// const insertQuestion =
+//   `INSERT INTO
+//     questions(
+//       "product_id",
+//       "body",
+//       "asker_name",
+//       "asker_email",
+//       "reported",
+//       "helpful"
+//     )
+//   VALUES (
+//     $1,
+//     $2,
+//     $3,
+//     $4,
+//     'false',
+//     0
+//   );`;
+
+// psqlConnection.query(
+//     insertQuestion,
+//     [productID, questionBody, askerName, askerEmail],
+//     function(err, results) {
+//       callback(err, results);
+//     });
+// };
 
 module.exports = {
   getQuestionsWithAnswersAndPhotos,
   getAllAnswersForQuestion,
+  postQuestion,
+  postAnswerForQuestion,
 };
-
-// const getAllTransactions = function(callback) {
-//   var selectAll = 'SELECT * FROM transactions;';
-
-//   connection.query(selectAll, function(err, results) {
-//     if (err) {
-//       callback(err, null);
-//     } else {
-//       callback(null, results);
-//     }
-//   });
-// };
-
-// const getAllCategories = function(callback) {
-//   var selectAll = 'SELECT * FROM categories;';
-
-//   connection.query(selectAll, function(err, results) {
-//     if (err) {
-//       callback(err, null);
-//     } else {
-//       callback(null, results);
-//     }
-//   });
-// };
-
-// const postCategory = function(categoryName, categoryBudget, callback) {
-//   var name = JSON.stringify(categoryName);
-
-//   var addOne = `INSERT INTO categories (categoryName,
-// categoryBudget) VALUES (${name}, ${categoryBudget});`;
-
-//   connection.query(addOne, function(err, results) {
-//     if (err) {
-//       callback(err, null);
-//     } else {
-//       callback(null, results);
-//     }
-//   });
-// };
-
-// const updateCategoryID = function(category_id, transactionID, callback) {
-//   var updateID = `UPDATE transactions SET category_id
-// = ${category_id} WHERE id = ${transactionID};`;
-
-//   connection.query(updateID, function(err, results) {
-//     if (err) {
-//       callback(err, null);
-//     } else {
-//       callback(null, results);
-//     }
-//   });
-// };
-
-// module.exports = {
-//   getAllTransactions,
-//   getAllCategories,
-//   postCategory,
-//   updateCategoryID
-// };
