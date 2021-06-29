@@ -148,6 +148,34 @@ const updateAnswerHelpfulness = function(answerID, callback) {
   });
 };
 
+const updateQuestionReported = function(questionID, callback) {
+  const updateReported =
+    `UPDATE
+      questions
+    SET
+      reported = true
+    WHERE
+      id = $1;`;
+
+  psqlConnection.query(updateReported, [questionID], function(err, results) {
+    callback(err, results);
+  });
+};
+
+const updateAnswerReported = function(answerID, callback) {
+  const updateReported =
+    `UPDATE
+      answers
+    SET
+      reported = true
+    WHERE
+      id = $1;`;
+
+  psqlConnection.query(updateReported, [answerID], function(err, results) {
+    callback(err, results);
+  });
+};
+
 module.exports = {
   getQuestionsWithAnswersAndPhotos,
   getAllAnswersForQuestion,
@@ -155,6 +183,8 @@ module.exports = {
   postAnswerForQuestion,
   updateQuestionHelpfulness,
   updateAnswerHelpfulness,
+  updateQuestionReported,
+  updateAnswerReported,
 };
 
 

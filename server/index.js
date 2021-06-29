@@ -101,6 +101,35 @@ app.put('/qa/answers/helpful', (req, res) => {
       });
 });
 
+app.put('/qa/questions/report', (req, res) => {
+  const questionID = req.query.question_id;
+
+  questions.updateQuestionReported(
+      questionID,
+      function(err, results) {
+        if (err) {
+          res.status(400).send('Error changing question to be reported :(');
+        } else {
+          res.status(200).send('Success changing question to be reported! :)');
+        }
+      });
+});
+
+app.put('/qa/answers/report', (req, res) => {
+  const answerID = req.query.answer_id;
+
+  questions.updateAnswerReported(
+      answerID,
+      function(err, results) {
+        if (err) {
+          res.status(400).send('Error changing answer to be reported :(');
+        } else {
+          res.status(200).send('Success changing answer to be reported! :)');
+        }
+      });
+});
+
+
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });
