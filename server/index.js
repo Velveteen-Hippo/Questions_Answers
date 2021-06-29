@@ -13,28 +13,66 @@ app.use(bodyParser.json());
 
 app.get('/qa/questions', (req, res) => {
   const productID = req.query.product_id;
+  let page;
+  if (req.query.page) {
+    page = req.query.page;
+  } else {
+    page = 1;
+  }
 
-  questions.getQuestionsWithAnswersAndPhotos(productID, function(err, results) {
-    if (err) {
-      res.status(400).send(
-          'Error getting all questions, answers, photos for product :(',
-      );
-    } else {
-      res.status(200).send(results);
-    }
-  });
+  let count;
+  if (req.query.count) {
+    count = req.query.count;
+  } else {
+    count = 5;
+  }
+
+  questions.getQuestionsWithAnswersAndPhotos(
+      productID,
+      page,
+      count,
+      function(err, results) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(200).send({product_id: productID, results: results.rows});
+        }
+      });
 });
 
 app.get('/qa/answers', (req, res) => {
   const questionID = req.query.question_id;
+  let page;
+  if (req.query.page) {
+    page = req.query.page;
+  } else {
+    page = 1;
+  }
 
-  questions.getAllAnswersForQuestion(questionID, function(err, results) {
-    if (err) {
-      res.status(400).send('Error getting all answers for question :(');
-    } else {
-      res.status(200).send(results);
-    }
-  });
+  let count;
+  if (req.query.count) {
+    count = req.query.count;
+  } else {
+    count = 5;
+  }
+
+  questions.getAllAnswersForQuestion(
+      questionID,
+      page,
+      count,
+      function(err, results) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(200).send(
+              {question: questionID,
+                page: page,
+                count: count,
+                results: results,
+              },
+          );
+        }
+      });
 });
 
 app.post('/qa/questions', (req, res) => {
@@ -47,9 +85,9 @@ app.post('/qa/questions', (req, res) => {
       questionBody, askerName, askerEmail, productID,
       function(err, results) {
         if (err) {
-          res.status(400).send('Error creating question :(');
+          res.status(400).send(err);
         } else {
-          res.status(200).send('Question created! :)');
+          res.status(201).send('Question created! :)');
         }
       });
 });
@@ -65,10 +103,9 @@ app.post('/qa/answers', (req, res) => {
       questionID, answerBody, answererName, answererEmail, photos,
       function(err, results) {
         if (err) {
-          console.log('err', err);
-          res.status(400).send('Error creating answer :(');
+          res.status(400).send(err);
         } else {
-          res.status(200).send('Answer created! :)');
+          res.status(201).send('Answer created! :)');
         }
       });
 });
@@ -80,9 +117,9 @@ app.put('/qa/questions/helpful', (req, res) => {
       questionID,
       function(err, results) {
         if (err) {
-          res.status(400).send('Error updating question helpfulness :(');
+          res.status(400).send(err);
         } else {
-          res.status(200).send('Success updating question helpfulness! :)');
+          res.status(204).send('Success updating question helpfulness! :)');
         }
       });
 });
@@ -94,9 +131,9 @@ app.put('/qa/answers/helpful', (req, res) => {
       answerID,
       function(err, results) {
         if (err) {
-          res.status(400).send('Error updating answer helpfulness :(');
+          res.status(400).send(err);
         } else {
-          res.status(200).send('Success updating answer helpfulness! :)');
+          res.status(204).send('Success updating answer helpfulness! :)');
         }
       });
 });
@@ -108,9 +145,9 @@ app.put('/qa/questions/report', (req, res) => {
       questionID,
       function(err, results) {
         if (err) {
-          res.status(400).send('Error changing question to be reported :(');
+          res.status(400).send(err);
         } else {
-          res.status(200).send('Success changing question to be reported! :)');
+          res.status(204).send('Success changing question to be reported! :)');
         }
       });
 });
@@ -122,9 +159,9 @@ app.put('/qa/answers/report', (req, res) => {
       answerID,
       function(err, results) {
         if (err) {
-          res.status(400).send('Error changing answer to be reported :(');
+          res.status(400).send(err);
         } else {
-          res.status(200).send('Success changing answer to be reported! :)');
+          res.status(204).send('Success changing answer to be reported! :)');
         }
       });
 });
