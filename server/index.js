@@ -13,28 +13,66 @@ app.use(bodyParser.json());
 
 app.get('/qa/questions', (req, res) => {
   const productID = req.query.product_id;
+  let page;
+  if (req.query.page) {
+    page = req.query.page;
+  } else {
+    page = 1;
+  }
 
-  questions.getQuestionsWithAnswersAndPhotos(productID, function(err, results) {
-    if (err) {
-      res.status(400).send(
-          'Error getting all questions, answers, photos for product :(',
-      );
-    } else {
-      res.status(200).send(results);
-    }
-  });
+  let count;
+  if (req.query.count) {
+    count = req.query.count;
+  } else {
+    count = 5;
+  }
+
+  questions.getQuestionsWithAnswersAndPhotos(
+      productID,
+      page,
+      count,
+      function(err, results) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(200).send({product_id: productID, results: results.rows});
+        }
+      });
 });
 
-app.get('/qa/questions/:question_id/answers', (req, res) => {
-  const questionID = req.params.question_id;
+app.get('/qa/answers', (req, res) => {
+  const questionID = req.query.question_id;
+  let page;
+  if (req.query.page) {
+    page = req.query.page;
+  } else {
+    page = 1;
+  }
 
-  questions.getAllAnswersForQuestion(questionID, function(err, results) {
-    if (err) {
-      res.status(400).send('Error getting all answers for question :(');
-    } else {
-      res.status(200).send(results);
-    }
-  });
+  let count;
+  if (req.query.count) {
+    count = req.query.count;
+  } else {
+    count = 5;
+  }
+
+  questions.getAllAnswersForQuestion(
+      questionID,
+      page,
+      count,
+      function(err, results) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(200).send(
+              {question: questionID,
+                page: page,
+                count: count,
+                results: results,
+              },
+          );
+        }
+      });
 });
 
 app.post('/qa/questions', (req, res) => {
@@ -47,9 +85,9 @@ app.post('/qa/questions', (req, res) => {
       questionBody, askerName, askerEmail, productID,
       function(err, results) {
         if (err) {
-          res.status(400).send('Error creating question :(');
+          res.status(400).send(err);
         } else {
-          res.status(200).send('Question created! :)');
+          res.status(201).send('Question created! :)');
         }
       });
 });
@@ -65,46 +103,72 @@ app.post('/qa/answers', (req, res) => {
       questionID, answerBody, answererName, answererEmail, photos,
       function(err, results) {
         if (err) {
-          console.log('err', err);
-          res.status(400).send('Error creating answer :(');
+          res.status(400).send(err);
         } else {
-          res.status(200).send('Answer created! :)');
+          res.status(201).send('Answer created! :)');
         }
       });
 });
+
+app.put('/qa/questions/helpful', (req, res) => {
+  const questionID = req.query.question_id;
+
+  questions.updateQuestionHelpfulness(
+      questionID,
+      function(err, results) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(204).send('Success updating question helpfulness! :)');
+        }
+      });
+});
+
+app.put('/qa/answers/helpful', (req, res) => {
+  const answerID = req.query.answer_id;
+
+  questions.updateAnswerHelpfulness(
+      answerID,
+      function(err, results) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(204).send('Success updating answer helpfulness! :)');
+        }
+      });
+});
+
+app.put('/qa/questions/report', (req, res) => {
+  const questionID = req.query.question_id;
+
+  questions.updateQuestionReported(
+      questionID,
+      function(err, results) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(204).send('Success changing question to be reported! :)');
+        }
+      });
+});
+
+app.put('/qa/answers/report', (req, res) => {
+  const answerID = req.query.answer_id;
+
+  questions.updateAnswerReported(
+      answerID,
+      function(err, results) {
+        if (err) {
+          res.status(400).send(err);
+        } else {
+          res.status(204).send('Success changing answer to be reported! :)');
+        }
+      });
+});
+
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });
 
-
-// app.post('/api/categories', (req, res) => {
-//   var categoryName = req.body.name;
-//   var categoryBudget = req.body.budget;
-
-//   db.postCategory(categoryName, categoryBudget, function(err, results) {
-//     if (err) {
-//       console.log('Error posting category');
-//       res.send('Error posting category');
-//     } else {
-//       console.log('Success posting category');
-//       res.send('Success posting category');
-//     }
-//   });
-// });
-
-// app.put('/api/transactions', (req, res) => {
-//   var category_id = req.body.category_id;
-//   var transactionID = req.body.id;
-
-//   db.updateCategoryID(category_id, transactionID, function(err, results) {
-//     if (err) {
-//       console.log('Error updating category for this transaction');
-//       res.send('Error updating category for this transaction');
-//     } else {
-//       console.log('Success updating category for this transaction');
-//       res.send('Success updating category for this transaction');
-//     }
-//   });
-// });
 

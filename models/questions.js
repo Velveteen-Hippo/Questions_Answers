@@ -1,16 +1,8 @@
 // import connection to psql database
 const psqlConnection = require('../Database');
 
-// const getAllQuestionsForProduct = function(productID, callback) {
-//   const selectAllQuestionsForProduct =
-//     `SELECT * FROM questions WHERE product_id=${productID};`;
-
-//   psqlConnection.query(selectAllQuestionsForProduct, function(err, results) {
-//     callback(err, results.rows);
-//   });
-// };
-
-const getQuestionsWithAnswersAndPhotos = function(productID, callback) {
+const getQuestionsWithAnswersAndPhotos = function(
+    productID, page, count, callback) {
   const joinQAndA =
     `SELECT
       questions.id,
@@ -25,21 +17,31 @@ const getQuestionsWithAnswersAndPhotos = function(productID, callback) {
         'date', answers.date_written,
         'answerer_name', answers.answerer_name,
         'helpfulness', answers.helpful,
-        'photos', answers.photos)) as answers
+        'photos', answers.photos,
+        'reported', answers.reported)) as answers
     FROM questions
-    JOIN answers
+    LEFT JOIN answers
       ON questions.id = answers.question_id
     WHERE questions.product_id=$1
       AND questions.reported = false
-      AND answers.reported = false
-    GROUP BY questions.id;`;
 
-  psqlConnection.query(joinQAndA, [productID], function(err, results) {
-    callback(err, results.rows);
-  });
+    GROUP BY questions.id
+    OFFSET $2
+    LIMIT $3;`;
+
+  psqlConnection.query(
+      joinQAndA,
+      [productID, page, count],
+      function(err, results) {
+        if (err) {
+          callback(err, null);
+        } else {
+          callback(null, results);
+        }
+      });
 };
 
-const getAllAnswersForQuestion = function(questionID, callback) {
+const getAllAnswersForQuestion = function(questionID, page, count, callback) {
   const selectAllAnswersForQuestion =
     `SELECT
       *
@@ -50,13 +52,19 @@ const getAllAnswersForQuestion = function(questionID, callback) {
       AND
       reported = false
     GROUP BY
-      answers.id;`;
+      answers.id
+    OFFSET $2
+    LIMIT $3;`;
 
   psqlConnection.query(
       selectAllAnswersForQuestion,
-      [questionID],
+      [questionID, page, count],
       function(err, results) {
-        callback(err, results.rows);
+        if (err) {
+          callback(err, null);
+        } else {
+          callback(null, results.rows);
+        }
       });
 };
 
@@ -85,7 +93,11 @@ const postQuestion = function(
       insertQuestion,
       [productID, questionBody, askerName, askerEmail],
       function(err, results) {
-        callback(err, results);
+        if (err) {
+          callback(err, null);
+        } else {
+          callback(null, results);
+        }
       });
 };
 
@@ -116,8 +128,84 @@ const postAnswerForQuestion = function(
       insertAnswer,
       [questionID, answerBody, answererName, answererEmail, photos],
       function(err, results) {
-        callback(err, results);
+        if (err) {
+          callback(err, null);
+        } else {
+          callback(null, results);
+        }
       });
+};
+
+const updateQuestionHelpfulness = function(questionID, callback) {
+  const updateHelpfulness =
+    `UPDATE
+      questions
+    SET
+      helpful = helpful + 1
+    WHERE
+      id = $1;`;
+
+  psqlConnection.query(updateHelpfulness, [questionID], function(err, results) {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, results);
+    }
+  });
+};
+
+const updateAnswerHelpfulness = function(answerID, callback) {
+  const updateHelpfulness =
+    `UPDATE
+      answers
+    SET
+      helpful = helpful + 1
+    WHERE
+      id = $1;`;
+
+  psqlConnection.query(updateHelpfulness, [answerID], function(err, results) {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, results);
+    }
+  });
+};
+
+const updateQuestionReported = function(questionID, callback) {
+  const updateReported =
+    `UPDATE
+      questions
+    SET
+      reported = true
+    WHERE
+      id = $1;`;
+
+  psqlConnection.query(updateReported, [questionID], function(err, results) {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, results);
+    }
+  });
+};
+
+const updateAnswerReported = function(answerID, callback) {
+  const updateReported =
+    `UPDATE
+      answers
+    SET
+      reported = true
+    WHERE
+      id = $1;`;
+
+  psqlConnection.query(updateReported, [answerID], function(err, results) {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, results);
+    }
+  });
 };
 
 module.exports = {
@@ -125,6 +213,10 @@ module.exports = {
   getAllAnswersForQuestion,
   postQuestion,
   postAnswerForQuestion,
+  updateQuestionHelpfulness,
+  updateAnswerHelpfulness,
+  updateQuestionReported,
+  updateAnswerReported,
 };
 
 
