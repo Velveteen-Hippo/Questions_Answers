@@ -120,11 +120,41 @@ const postAnswerForQuestion = function(
       });
 };
 
+const updateQuestionHelpfulness = function(questionID, callback) {
+  const updateHelpfulness =
+    `UPDATE
+      questions
+    SET
+      helpful = helpful + 1
+    WHERE
+      id = $1;`;
+
+  psqlConnection.query(updateHelpfulness, [questionID], function(err, results) {
+    callback(err, results);
+  });
+};
+
+const updateAnswerHelpfulness = function(answerID, callback) {
+  const updateHelpfulness =
+    `UPDATE
+      answers
+    SET
+      helpful = helpful + 1
+    WHERE
+      id = $1;`;
+
+  psqlConnection.query(updateHelpfulness, [answerID], function(err, results) {
+    callback(err, results);
+  });
+};
+
 module.exports = {
   getQuestionsWithAnswersAndPhotos,
   getAllAnswersForQuestion,
   postQuestion,
   postAnswerForQuestion,
+  updateQuestionHelpfulness,
+  updateAnswerHelpfulness,
 };
 
 

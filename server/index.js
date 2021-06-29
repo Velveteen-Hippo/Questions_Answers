@@ -25,8 +25,8 @@ app.get('/qa/questions', (req, res) => {
   });
 });
 
-app.get('/qa/questions/:question_id/answers', (req, res) => {
-  const questionID = req.params.question_id;
+app.get('/qa/answers', (req, res) => {
+  const questionID = req.query.question_id;
 
   questions.getAllAnswersForQuestion(questionID, function(err, results) {
     if (err) {
@@ -73,38 +73,36 @@ app.post('/qa/answers', (req, res) => {
       });
 });
 
+app.put('/qa/questions/helpful', (req, res) => {
+  const questionID = req.query.question_id;
+
+  questions.updateQuestionHelpfulness(
+      questionID,
+      function(err, results) {
+        if (err) {
+          res.status(400).send('Error updating question helpfulness :(');
+        } else {
+          res.status(200).send('Success updating question helpfulness! :)');
+        }
+      });
+});
+
+app.put('/qa/answers/helpful', (req, res) => {
+  const answerID = req.query.answer_id;
+
+  questions.updateAnswerHelpfulness(
+      answerID,
+      function(err, results) {
+        if (err) {
+          res.status(400).send('Error updating answer helpfulness :(');
+        } else {
+          res.status(200).send('Success updating answer helpfulness! :)');
+        }
+      });
+});
+
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });
 
-
-// app.post('/api/categories', (req, res) => {
-//   var categoryName = req.body.name;
-//   var categoryBudget = req.body.budget;
-
-//   db.postCategory(categoryName, categoryBudget, function(err, results) {
-//     if (err) {
-//       console.log('Error posting category');
-//       res.send('Error posting category');
-//     } else {
-//       console.log('Success posting category');
-//       res.send('Success posting category');
-//     }
-//   });
-// });
-
-// app.put('/api/transactions', (req, res) => {
-//   var category_id = req.body.category_id;
-//   var transactionID = req.body.id;
-
-//   db.updateCategoryID(category_id, transactionID, function(err, results) {
-//     if (err) {
-//       console.log('Error updating category for this transaction');
-//       res.send('Error updating category for this transaction');
-//     } else {
-//       console.log('Success updating category for this transaction');
-//       res.send('Success updating category for this transaction');
-//     }
-//   });
-// });
 
