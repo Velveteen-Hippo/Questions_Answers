@@ -71,6 +71,10 @@ CREATE TABLE answers (
 -- \d+ answers;
 
 
+-- See timing of queries in terminal:
+-- \timing
+
+
 -- Convert date from unix to date timestamp
 -- ALTER TABLE  answers
 --   ALTER COLUMN date_written TYPE TIMESTAMP USING
