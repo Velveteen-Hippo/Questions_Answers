@@ -11,20 +11,22 @@ const getQuestionsWithAnswersAndPhotos = function(
       questions.asker_name,
       questions.helpful,
       questions.reported,
-      jsonb_agg(json_build_object(
+      COALESCE (jsonb_agg(json_build_object(
         'id', answers.id,
         'body', answers.body,
         'date', answers.date_written,
         'answerer_name', answers.answerer_name,
         'helpfulness', answers.helpful,
         'photos', answers.photos,
-        'reported', answers.reported)) as answers
+        'reported', answers.reported))
+        FILTER
+          (WHERE answers.id IS NOT NULL AND answers.reported = false), '[]')
+        as answers
     FROM questions
     LEFT JOIN answers
       ON questions.id = answers.question_id
     WHERE questions.product_id=$1
       AND questions.reported = false
-
     GROUP BY questions.id
     OFFSET $2
     LIMIT $3;`;

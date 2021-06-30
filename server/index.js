@@ -13,6 +13,7 @@ app.use(bodyParser.json());
 
 app.get('/qa/questions', (req, res) => {
   const productID = req.query.product_id;
+  console.log('req to questions', productID);
   let page;
   if (req.query.page) {
     page = req.query.page;
