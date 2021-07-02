@@ -13,7 +13,6 @@ app.use(bodyParser.json());
 
 app.get('/qa/questions', (req, res) => {
   const productID = req.query.product_id;
-  console.log('req to questions', productID);
   let page;
   if (req.query.page) {
     page = req.query.page;
@@ -81,6 +80,8 @@ app.post('/qa/questions', (req, res) => {
   const askerName = req.body.name;
   const askerEmail = req.body.email;
   const productID = req.body.product_id;
+
+  console.log('req', req);
 
   questions.postQuestion(
       questionBody, askerName, askerEmail, productID,

@@ -5,6 +5,9 @@
 -- Show tables:
 -- \dt
 
+-- Show databases:
+-- \l
+
 -- DROP DATABASE IF EXISTS qanda;
 
 -- CREATE DATABASE qanda;
@@ -51,20 +54,6 @@ CREATE TABLE answers (
 --          REFERENCES answers(id)
 --          ON DELETE CASCADE
 -- );
-
-
-
--- qanda=# SELECT to_timestamp(1599958385988::double precision /1000);
---         to_timestamp
--- ----------------------------
---  2020-09-12 18:53:05.988-06
--- (1 row)
-
--- qanda=# SELECT timestamp '1970-01-01 00:00:00' + interval '1599958385 second';
---       ?column?
--- ---------------------
---  2020-09-13 00:53:05
--- (1 row)
 
 
 -- See details of a table:
