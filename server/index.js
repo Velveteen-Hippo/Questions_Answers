@@ -5,7 +5,7 @@ const questions = require('../models/questions.js');
 const bodyParser = require('body-parser');
 
 const app = express();
-const PORT = 3000;
+const PORT = 4000;
 
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
@@ -14,17 +14,17 @@ app.use(bodyParser.json());
 app.get('/qa/questions', (req, res) => {
   const productID = req.query.product_id;
   let page;
-  if (req.query.page) {
-    page = req.query.page;
-  } else {
-    page = 1;
-  }
-
   let count;
   if (req.query.count) {
     count = req.query.count;
   } else {
     count = 5;
+  }
+
+  if (req.query.page) {
+    page = (req.query.page - 1) * count;
+  } else {
+    page = 0;
   }
 
   questions.getQuestionsWithAnswersAndPhotos(
@@ -40,20 +40,20 @@ app.get('/qa/questions', (req, res) => {
       });
 });
 
-app.get('/qa/answers', (req, res) => {
-  const questionID = req.query.question_id;
+app.get('/qa/questions/:question_id/answers', (req, res) => {
+  const questionID = req.params.question_id;
   let page;
-  if (req.query.page) {
-    page = req.query.page;
-  } else {
-    page = 1;
-  }
-
   let count;
   if (req.query.count) {
     count = req.query.count;
   } else {
     count = 5;
+  }
+
+  if (req.query.page) {
+    page = (req.query.page - 1) * count;
+  } else {
+    page = 0;
   }
 
   questions.getAllAnswersForQuestion(
@@ -81,8 +81,6 @@ app.post('/qa/questions', (req, res) => {
   const askerEmail = req.body.email;
   const productID = req.body.product_id;
 
-  console.log('req', req);
-
   questions.postQuestion(
       questionBody, askerName, askerEmail, productID,
       function(err, results) {
@@ -94,8 +92,8 @@ app.post('/qa/questions', (req, res) => {
       });
 });
 
-app.post('/qa/answers', (req, res) => {
-  const questionID = req.query.question_id;
+app.post('/qa/questions/:question_id/answers', (req, res) => {
+  const questionID = req.params.question_id;
   const answerBody = req.body.body;
   const answererName = req.body.name;
   const answererEmail = req.body.email;
@@ -112,8 +110,8 @@ app.post('/qa/answers', (req, res) => {
       });
 });
 
-app.put('/qa/questions/helpful', (req, res) => {
-  const questionID = req.query.question_id;
+app.put('/qa/questions/:question_id/helpful', (req, res) => {
+  const questionID = req.params.question_id;
 
   questions.updateQuestionHelpfulness(
       questionID,
@@ -126,8 +124,8 @@ app.put('/qa/questions/helpful', (req, res) => {
       });
 });
 
-app.put('/qa/answers/helpful', (req, res) => {
-  const answerID = req.query.answer_id;
+app.put('/qa/answers/:answer_id/helpful', (req, res) => {
+  const answerID = req.params.answer_id;
 
   questions.updateAnswerHelpfulness(
       answerID,
@@ -140,8 +138,8 @@ app.put('/qa/answers/helpful', (req, res) => {
       });
 });
 
-app.put('/qa/questions/report', (req, res) => {
-  const questionID = req.query.question_id;
+app.put('/qa/questions/:question_id/report', (req, res) => {
+  const questionID = req.params.question_id;
 
   questions.updateQuestionReported(
       questionID,
@@ -154,8 +152,8 @@ app.put('/qa/questions/report', (req, res) => {
       });
 });
 
-app.put('/qa/answers/report', (req, res) => {
-  const answerID = req.query.answer_id;
+app.put('/qa/answers/:answer_id/report', (req, res) => {
+  const answerID = req.params.answer_id;
 
   questions.updateAnswerReported(
       answerID,
