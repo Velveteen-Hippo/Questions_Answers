@@ -4,32 +4,33 @@ const psqlConnection = require('../Database');
 const getQuestionsWithAnswersAndPhotos = function(
     productID, page, count, callback) {
   const joinQAndA =
-    `SELECT
-      questions.id,
-      questions.body,
-      questions.date_written,
-      questions.asker_name,
-      questions.helpful,
-      questions.reported,
-      COALESCE (jsonb_agg(json_build_object(
-        'id', answers.id,
-        'body', answers.body,
-        'date', answers.date_written,
-        'answerer_name', answers.answerer_name,
-        'helpfulness', answers.helpful,
-        'photos', answers.photos,
-        'reported', answers.reported))
-        FILTER
-          (WHERE answers.id IS NOT NULL AND answers.reported = false), '[]')
-        as answers
-    FROM questions
-    LEFT JOIN answers
-      ON questions.id = answers.question_id
-    WHERE questions.product_id=$1
-      AND questions.reported = false
-    GROUP BY questions.id
-    OFFSET $2
-    LIMIT $3;`;
+  `SELECT
+    questions.question_id,
+    questions.question_body,
+    questions.question_date,
+    questions.asker_name,
+    questions.question_helpfulness,
+    questions.reported,
+    COALESCE (jsonb_object_agg(answers.answer_id, json_build_object(
+      'id', answers.answer_id,
+      'body', answers.body,
+      'date', answers.date,
+      'answerer_name', answers.answerer_name,
+      'helpfulness', answers.helpfulness,
+      'photos', answers.photos,
+      'reported', answers.reported))
+      FILTER
+        (WHERE answers.answer_id IS NOT NULL
+          AND answers.reported = false), '[]')
+      as answers
+  FROM questions
+  LEFT JOIN answers
+    ON questions.question_id = answers.question_id
+  WHERE questions.product_id=$1
+    AND questions.reported = false
+  GROUP BY questions.question_id
+  OFFSET $2
+  LIMIT $3;`;
 
   psqlConnection.query(
       joinQAndA,
@@ -54,7 +55,7 @@ const getAllAnswersForQuestion = function(questionID, page, count, callback) {
       AND
       reported = false
     GROUP BY
-      answers.id
+      answers.answer_id
     OFFSET $2
     LIMIT $3;`;
 
@@ -73,23 +74,23 @@ const getAllAnswersForQuestion = function(questionID, page, count, callback) {
 const postQuestion = function(
     questionBody, askerName, askerEmail, productID, callback) {
   const insertQuestion =
-    `INSERT INTO
-      questions(
-        "product_id",
-        "body",
-        "asker_name",
-        "asker_email",
-        "reported",
-        "helpful"
-      )
-    VALUES (
-      $1,
-      $2,
-      $3,
-      $4,
-      'false',
-      0
-    );`;
+  `INSERT INTO
+    questions(
+      "product_id",
+      "question_body",
+      "asker_name",
+      "asker_email",
+      "reported",
+      "question_helpfulness"
+    )
+  VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    'false',
+    0
+  );`;
 
   psqlConnection.query(
       insertQuestion,
@@ -106,25 +107,25 @@ const postQuestion = function(
 const postAnswerForQuestion = function(
     questionID, answerBody, answererName, answererEmail, photos, callback) {
   const insertAnswer =
-    `INSERT INTO
-      answers(
-        "question_id",
-        "body",
-        "answerer_name",
-        "answerer_email",
-        "photos",
-        "reported",
-        "helpful"
-      )
-    VALUES (
-      $1,
-      $2,
-      $3,
-      $4,
-      $5,
-      'false',
-      0
-    );`;
+  `INSERT INTO
+    answers(
+      "question_id",
+      "body",
+      "answerer_name",
+      "answerer_email",
+      "photos",
+      "reported",
+      "helpfulness"
+    )
+  VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    'false',
+    0
+  );`;
 
   psqlConnection.query(
       insertAnswer,
@@ -143,9 +144,9 @@ const updateQuestionHelpfulness = function(questionID, callback) {
     `UPDATE
       questions
     SET
-      helpful = helpful + 1
+      question_helpfulness = question_helpfulness + 1
     WHERE
-      id = $1;`;
+      question_id = $1;`;
 
   psqlConnection.query(updateHelpfulness, [questionID], function(err, results) {
     if (err) {
@@ -161,9 +162,9 @@ const updateAnswerHelpfulness = function(answerID, callback) {
     `UPDATE
       answers
     SET
-      helpful = helpful + 1
+      helpfulness = helpfulness + 1
     WHERE
-      id = $1;`;
+      answer_id = $1;`;
 
   psqlConnection.query(updateHelpfulness, [answerID], function(err, results) {
     if (err) {
@@ -179,9 +180,9 @@ const updateQuestionReported = function(questionID, callback) {
     `UPDATE
       questions
     SET
-      reported = true
+      questions.reported = true
     WHERE
-      id = $1;`;
+      question_id = $1;`;
 
   psqlConnection.query(updateReported, [questionID], function(err, results) {
     if (err) {
@@ -199,7 +200,7 @@ const updateAnswerReported = function(answerID, callback) {
     SET
       reported = true
     WHERE
-      id = $1;`;
+      answer_id = $1;`;
 
   psqlConnection.query(updateReported, [answerID], function(err, results) {
     if (err) {
